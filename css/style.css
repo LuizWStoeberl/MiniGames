@@ -2,7 +2,7 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     margin: 0;
-    padding: 0;
+    padding: 10px;
     background-color: #f0f0f0;
 }
 
@@ -15,6 +15,10 @@ body {
 }
 
 .retanguloGames {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     width: 800px;
     height: 600px;
     border: 2px solid #000;
@@ -25,10 +29,15 @@ body {
     display: flex;
     justify-content: center;
     align-self: center;
-    width: 550px;
+    width: 600px;
     height: 100px;
     border: 2px solid #000;
     border-radius: 25px;
     background-color: blue;
     margin-top: 10px;
+}
+
+canvas {
+    border: 2px solid #000;
+    background-color: aquamarine;
 }
