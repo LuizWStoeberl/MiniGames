@@ -1,6 +1,8 @@
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext("2d");
 
+let jogoIniciado = false;
+
 // Bola
 let xBola = canvas.width / 2;
 let yBola = canvas.height / 2;
@@ -43,6 +45,15 @@ document.addEventListener("keydown", (e) => {
     if (e.code === "Space" && !jogoRodando) {
         iniciarJogo();
     }
+
+    if (e.code === "Escape") {
+        jogoRodando = !jogoRodando;
+        if (!jogoRodando) {
+            console.log("Jogo pausado");
+        } else {
+            console.log("Jogo retomado");
+        }
+    }
 });
 
 document.addEventListener("keyup", (e) => {
@@ -57,6 +68,7 @@ function iniciarJogo() {
     velBolaX = (Math.random() < 0.5 ? -1 : 1) * (Math.random() * 4 + 2);
     velBolaY = (Math.random() < 0.5 ? -1 : 1) * (Math.random() * 4 + 2);
     jogoRodando = true;
+    jogoIniciado = true;
     startBtn.style.display = "none";
 }
 
@@ -79,14 +91,14 @@ function resetarPlataformaPlayer() {
     plataformaX = 325;
     plataformaY = 700;
     jogoRodando = false;
-    startBtn.style.display = "block"; 
+    startBtn.style.display = "block";
 }
 
 function resetarPlataformaEnemy() {
     roxaX = 325;
     roxaY = 100;
     jogoRodando = false;
-    startBtn.style.display = "block"; 
+    startBtn.style.display = "block";
 }
 
 // Lógica funcional do jogo
@@ -106,13 +118,13 @@ function atualizar() {
     // IA
     let centroRoxa = roxaX + roxaLargura / 2;
 
-    
+
     if (velBolaY < 0) {
         let distancia = xBola - centroRoxa;
 
-        
+
         if (Math.abs(distancia) > margemErro) {
-            
+
             if (distancia > 0) {
                 roxaX += Math.min(distancia, velocidadeRoxa);
             } else {
@@ -166,10 +178,15 @@ function atualizar() {
         let dist = (xBola - centro) / (plataformaLargura / 2);
         velBolaX = dist * 5 + (Math.random() - 0.5) * 2;
         velBolaY = -Math.abs(velBolaY);
+
+        velBolaX *= aceleracao;
+        velBolaY *= aceleracao;
+
+        velBolaX = Math.sign(velBolaX) * Math.min(Math.abs(velBolaX), velMax);
+        velBolaY = Math.sign(velBolaY) * Math.min(Math.abs(velBolaY), velMax);
     }
 
-    // Colisão com plataforma roxa (inimigo fixo)
-
+    // Colisão com plataforma roxa (inimigo)
     if (
         velBolaY < 0 &&
         yBola - raioBola <= roxaY + roxaAltura &&
@@ -181,38 +198,71 @@ function atualizar() {
         let dist = (xBola - centro) / (roxaLargura / 2);
         velBolaX = dist * 5 + (Math.random() - 0.5) * 2;
         velBolaY = Math.abs(velBolaY);
+
+        velBolaX *= aceleracao;
+        velBolaY *= aceleracao;
+
+        velBolaX = Math.sign(velBolaX) * Math.min(Math.abs(velBolaX), velMax);
+        velBolaY = Math.sign(velBolaY) * Math.min(Math.abs(velBolaY), velMax);
     }
 
-    if ( placarEnemy === 5 || placarPlayer === 5 ) {
+    if (placarEnemy === 5 || placarPlayer === 5) {
         reiniciarJogo();
         console.log("Jogo acabou!");
     }
 }
 
+let mostrarTexto = true;
+
+setInterval(() => {
+    mostrarTexto = !mostrarTexto;
+}, 500);
+
+function desenharTexto() {
+    if (!jogoRodando && !jogoIniciado) {
+        if (mostrarTexto) {
+            ctx.font = '48px sans-serif';
+            ctx.fillStyle = 'black';
+            ctx.fillText('Aperte Espaço', 250, canvas.height / 2);
+        }
+    }
+
+    if (!jogoRodando && jogoIniciado) {
+        ctx.font = '48px sans-serif';
+        ctx.fillStyle = 'black';
+        ctx.fillText('Jogo Pausado', 250, canvas.height / 2);
+    }
+
+}
 
 function desenhar() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    
+
     ctx.fillStyle = "red";
     ctx.fillRect(plataformaX, plataformaY, plataformaLargura, plataformaAltura);
 
-    
+
     ctx.fillStyle = "purple";
     ctx.fillRect(roxaX, roxaY, roxaLargura, roxaAltura);
 
-    
-    ctx.fillStyle = "black";
+
+    ctx.fillStyle = "brown";
     ctx.beginPath();
     ctx.arc(xBola, yBola, raioBola, 0, Math.PI * 2);
     ctx.fill();
 
-    
+
     ctx.fillStyle = "black";
     ctx.font = "20px Arial";
     ctx.fillText(`Player: ${placarPlayer}`, 20, 30);
     ctx.fillText(`Enemy: ${placarEnemy}`, canvas.width - 120, 30);
+
+
+    desenharTexto();
+
 }
+
 
 
 function loop() {
